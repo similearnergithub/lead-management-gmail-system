@@ -12,14 +12,15 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0a0a0a;
             min-height: 100vh;
             padding: 20px;
+            color: #ffffff;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -30,225 +31,284 @@
         }
 
         .header h1 {
-            font-size: 2.5em;
+            font-size: 2.8em;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            font-weight: 700;
+            letter-spacing: -1px;
         }
 
         .header p {
             font-size: 1.1em;
-            opacity: 0.9;
+            color: #a0a0a0;
+            font-weight: 400;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
             margin-bottom: 40px;
         }
 
         .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+            border: 1px solid #2a2a2a;
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(-8px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            border-color: #3a3a3a;
         }
 
-        .stat-card .icon {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+        .stat-card .icon-wrapper {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 28px;
+            background: #ffffff;
+            color: #0a0a0a;
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
         }
 
         .stat-card .label {
-            color: #666;
-            font-size: 0.95em;
-            font-weight: 500;
-            margin-bottom: 5px;
+            color: #a0a0a0;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .stat-card .value {
-            color: #333;
-            font-size: 2.5em;
+            color: #ffffff;
+            font-size: 3em;
             font-weight: 700;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            line-height: 1;
         }
 
         .stat-card .percentage {
-            color: #667eea;
-            font-size: 1.1em;
+            color: #ffffff;
+            font-size: 1em;
             font-weight: 600;
         }
 
-        .stat-card.primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .stat-card.primary .label,
-        .stat-card.primary .value {
-            color: white;
-        }
-
-        .stat-card.success {
-            border-left: 5px solid #28a745;
-        }
-
-        .stat-card.info {
-            border-left: 5px solid #17a2b8;
-        }
-
-        .stat-card.warning {
-            border-left: 5px solid #ffc107;
-        }
-
-        .stat-card.danger {
-            border-left: 5px solid #dc3545;
-        }
-
         .section {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 35px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            border: 1px solid #2a2a2a;
         }
 
         .section h2 {
-            color: #333;
-            margin-bottom: 20px;
+            color: #ffffff;
+            margin-bottom: 24px;
             font-size: 1.8em;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .leads-table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .leads-table {
             width: 100%;
             border-collapse: collapse;
+            background: #0a0a0a;
+        }
+
+        .leads-table thead {
+            background: #ffffff;
+            color: #0a0a0a;
         }
 
         .leads-table th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
+            padding: 16px 18px;
             text-align: left;
             font-weight: 600;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .leads-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #e0e0e0;
+            padding: 14px 18px;
+            border-bottom: 1px solid #2a2a2a;
+            color: #e0e0e0;
+            font-size: 0.95em;
         }
 
-        .leads-table tr:hover {
-            background: #f8f9fa;
+        .leads-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .leads-table tbody tr:hover {
+            background: #1a1a1a;
         }
 
         .badge {
-            display: inline-block;
-            padding: 5px 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 0.85em;
+            font-size: 0.8em;
             font-weight: 600;
+            white-space: nowrap;
         }
 
         .badge-success {
-            background: #d4edda;
-            color: #155724;
+            background: #1a2e1a;
+            color: #4ade80;
+            border: 1px solid #2a4a2a;
         }
 
         .badge-warning {
-            background: #fff3cd;
-            color: #856404;
+            background: #2e2a1a;
+            color: #fbbf24;
+            border: 1px solid #4a3a2a;
         }
 
         .badge-info {
-            background: #d1ecf1;
-            color: #0c5460;
+            background: #1a2a2e;
+            color: #60a5fa;
+            border: 1px solid #2a3a4a;
         }
 
         .badge-secondary {
-            background: #e2e3e5;
-            color: #383d41;
+            background: #2a2a2a;
+            color: #a0a0a0;
+            border: 1px solid #3a3a3a;
         }
 
         .actions {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 30px;
         }
 
         .btn {
-            padding: 12px 24px;
+            padding: 14px 28px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 1em;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #ffffff;
+            color: #0a0a0a;
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            background: #e0e0e0;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(255, 255, 255, 0.3);
         }
 
         .btn-secondary {
-            background: #6c757d;
-            color: white;
+            background: #1a1a1a;
+            color: #ffffff;
+            border: 2px solid #333333;
         }
 
         .btn-secondary:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
+            background: #2a2a2a;
+            transform: translateY(-3px);
         }
 
         .loading {
             text-align: center;
-            padding: 40px;
-            color: #666;
-            font-size: 1.2em;
+            padding: 60px 40px;
+            color: #a0a0a0;
+            font-size: 1.1em;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .empty-state {
             text-align: center;
-            padding: 40px;
-            color: #999;
+            padding: 60px 40px;
+            color: #666666;
         }
 
         .empty-state .icon {
-            font-size: 4em;
+            font-size: 5em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1.1em;
             margin-bottom: 20px;
         }
 
         @media (max-width: 768px) {
             .header h1 {
-                font-size: 1.8em;
+                font-size: 2em;
             }
 
             .stats-grid {
                 grid-template-columns: 1fr;
             }
 
-            .leads-table {
-                font-size: 0.9em;
+            .stat-card .value {
+                font-size: 2.5em;
+            }
+
+            .section {
+                padding: 24px;
             }
 
             .leads-table th,
             .leads-table td {
-                padding: 8px;
+                padding: 10px 12px;
+                font-size: 0.85em;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
@@ -257,39 +317,37 @@
     <div class="container">
         <div class="header">
             <h1>📊 Analytics Dashboard</h1>
-            <p>Track your leads and email engagement metrics</p>
+            <p>Monitor your leads and email engagement in real-time</p>
         </div>
 
-        <!-- Statistics Cards -->
         <div class="stats-grid">
-            <div class="stat-card primary">
-                <div class="icon">👥</div>
+            <div class="stat-card">
+                <div class="icon-wrapper">👥</div>
                 <div class="label">Total Leads</div>
                 <div class="value" id="totalLeads">0</div>
             </div>
 
-            <div class="stat-card info">
-                <div class="icon">📧</div>
+            <div class="stat-card">
+                <div class="icon-wrapper">📧</div>
                 <div class="label">Emails Sent</div>
                 <div class="value" id="totalEmailsSent">0</div>
             </div>
 
-            <div class="stat-card success">
-                <div class="icon">📬</div>
+            <div class="stat-card">
+                <div class="icon-wrapper">📬</div>
                 <div class="label">Emails Opened</div>
                 <div class="value" id="totalEmailsOpened">0</div>
                 <div class="percentage" id="openRate">0% Open Rate</div>
             </div>
 
-            <div class="stat-card warning">
-                <div class="icon">🔗</div>
+            <div class="stat-card">
+                <div class="icon-wrapper">🔗</div>
                 <div class="label">Links Clicked</div>
                 <div class="value" id="totalLinkClicks">0</div>
                 <div class="percentage" id="clickRate">0% Click Rate</div>
             </div>
         </div>
 
-        <!-- Recent Leads Section -->
         <div class="section">
             <h2>Recent Leads</h2>
             <div id="leadsContainer">
@@ -304,13 +362,11 @@
     </div>
 
     <script>
-        // Fetch analytics data
         async function fetchAnalytics() {
             try {
                 const response = await fetch('/api/analytics');
                 const data = await response.json();
 
-                // Update statistics
                 document.getElementById('totalLeads').textContent = data.totalLeads;
                 document.getElementById('totalEmailsSent').textContent = data.totalEmailsSent;
                 document.getElementById('totalEmailsOpened').textContent = data.totalEmailsOpened;
@@ -322,7 +378,6 @@
             }
         }
 
-        // Fetch leads data
         async function fetchLeads() {
             try {
                 const response = await fetch('/api/leads');
@@ -339,7 +394,6 @@
             }
         }
 
-        // Display leads in table
         function displayLeads(leads) {
             const container = document.getElementById('leadsContainer');
 
@@ -354,7 +408,7 @@
             }
 
             const tableHTML = `
-                <div style="overflow-x: auto;">
+                <div class="leads-table-wrapper">
                     <table class="leads-table">
                         <thead>
                             <tr>
@@ -372,12 +426,12 @@
                         <tbody>
                             ${leads.map(lead => `
                                 <tr>
-                                    <td>#${lead.id}</td>
-                                    <td><strong>${escapeHtml(lead.full_name)}</strong></td>
+                                    <td><strong>#${lead.id}</strong></td>
+                                    <td>${escapeHtml(lead.full_name)}</td>
                                     <td>${escapeHtml(lead.email)}</td>
                                     <td>${lead.phone ? escapeHtml(lead.phone) : '-'}</td>
                                     <td>${lead.company ? escapeHtml(lead.company) : '-'}</td>
-                                    <td>${escapeHtml(lead.requirement.substring(0, 50))}${lead.requirement.length > 50 ? '...' : ''}</td>
+                                    <td>${escapeHtml(lead.requirement.substring(0, 40))}${lead.requirement.length > 40 ? '...' : ''}</td>
                                     <td>${formatDate(lead.submission_time)}</td>
                                     <td>
                                         ${lead.email_sent 
@@ -385,9 +439,7 @@
                                             : '<span class="badge badge-warning">⏳ Pending</span>'
                                         }
                                     </td>
-                                    <td>
-                                        ${getEngagementBadge(lead)}
-                                    </td>
+                                    <td>${getEngagementBadge(lead)}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -398,7 +450,6 @@
             container.innerHTML = tableHTML;
         }
 
-        // Get engagement badge
         function getEngagementBadge(lead) {
             const badges = [];
             
@@ -417,7 +468,6 @@
             return badges.join(' ');
         }
 
-        // Format date
         function formatDate(dateString) {
             const date = new Date(dateString);
             const now = new Date();
@@ -434,23 +484,18 @@
             return date.toLocaleDateString();
         }
 
-        // Escape HTML to prevent XSS
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
-        // Refresh all data
         function refreshData() {
             fetchAnalytics();
             fetchLeads();
         }
 
-        // Auto-refresh every 30 seconds
         setInterval(refreshData, 30000);
-
-        // Initial load
         refreshData();
     </script>
 </body>
