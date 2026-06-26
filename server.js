@@ -137,14 +137,17 @@ function generateTrackingToken() {
 
 // API endpoint to submit lead form
 app.post('/api/submit-lead', async (req, res) => {
+  console.log('📨 Received lead submission:', req.body);
   try {
     const { fullName, email, phone, company, requirement } = req.body;
 
     if (!fullName || !email || !requirement) {
+      console.log('❌ Missing required fields');
       return res.status(400).json({ error: 'Full name, email, and requirement are required' });
     }
 
     const trackingToken = generateTrackingToken();
+    console.log('📝 Generated tracking token:', trackingToken);
 
     // Store lead in database
     db.run(
@@ -153,18 +156,21 @@ app.post('/api/submit-lead', async (req, res) => {
       [fullName, email, phone, company, requirement, trackingToken],
       function(err) {
         if (err) {
-          console.error('Error inserting lead:', err);
+          console.error('❌ Error inserting lead:', err);
           return res.status(500).json({ error: 'Failed to save lead' });
         }
 
         const leadId = this.lastID;
+        console.log('✅ Lead saved with ID:', leadId);
 
         // Respond immediately to avoid timeout
+        console.log('📤 Sending response to client');
         res.json({
           success: true,
           message: 'Lead submitted successfully',
           leadId: leadId
         });
+        console.log('✅ Response sent');
 
         // Send email asynchronously (don't wait for it)
         sendEmail(fullName, email, requirement, trackingToken, leadId)
