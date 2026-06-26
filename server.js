@@ -154,30 +154,41 @@ app.post('/api/submit-lead', async (req, res) => {
 
 // Send personalized email with tracking
 async function sendEmail(name, email, requirement, trackingToken) {
-  const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
-  const trackingPixelUrl = `${baseUrl}/api/track/open/${trackingToken}`;
-  const trackableLink = `${baseUrl}/api/track/click/${trackingToken}`;
+  try {
+    const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
+    const trackingPixelUrl = `${baseUrl}/api/track/open/${trackingToken}`;
+    const trackableLink = `${baseUrl}/api/track/click/${trackingToken}`;
 
-  const fromEmail = useEthereal ? 'noreply@leadsystem.com' : (process.env.EMAIL_USER || 'your-email@gmail.com');
-  const mailOptions = {
-    from: fromEmail,
-    to: email,
-    subject: 'Thank you for reaching out!',
-    html: `
-      <html>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2>Hi ${name},</h2>
-          <p>Thank you for reaching out.</p>
-          <p>We received your requirement: "<strong>${requirement}</strong>"</p>
-          <p>Learn more: <a href="${trackableLink}" style="color: #007bff; text-decoration: none;">Click here to learn more</a></p>
-          <p>Regards,<br>Team</p>
-          <img src="${trackingPixelUrl}" width="1" height="1" style="display: none;" alt="" />
-        </body>
-      </html>
-    `
-  };
+    const fromEmail = process.env.EMAIL_USER || 'your-email@gmail.com';
+    const mailOptions = {
+      from: fromEmail,
+      to: email,
+      subject: 'Thank you for reaching out!',
+      html: `
+        <html>
+          <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2>Hi ${name},</h2>
+            <p>Thank you for reaching out.</p>
+            <p>We received your requirement: "<strong>${requirement}</strong>"</p>
+            <p>Learn more: <a href="${trackableLink}" style="color: #007bff; text-decoration: none;">Click here to learn more</a></p>
+            <p>Regards,<br>Team</p>
+            <img src="${trackingPixelUrl}" width="1" height="1" style="display: none;" alt="" />
+          </body>
+        </html>
+      `
+    };
 
-  await transporter.sendMail(mailOptions);
+    console.log(`📧 Sending email from ${fromEmail} to ${email}`);
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`✅ Email sent successfully! Message ID: ${result.messageId}`);
+    console.log(`   Response: ${result.response}`);
+    return result;
+  } catch (error) {
+    console.error('❌ Error sending email:', error);
+    console.error('   Error code:', error.code);
+    console.error('   Error message:', error.message);
+    throw error;
+  }
 }
 
 // Email open tracking endpoint (tracking pixel)
