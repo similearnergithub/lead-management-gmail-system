@@ -18,76 +18,84 @@ app.use(express.static('public'));
 // Email configuration
 // Set USE_ETHEREAL=false in .env to use real email service
 let transporter;
+let emailReady = false;
 const useEthereal = process.env.USE_ETHEREAL !== 'false';
 
 async function setupEmail() {
-  if (useEthereal) {
-    // Demo mode: Create test account at https://ethereal.email/
-    const testAccount = await nodemailer.createTestAccount();
-    transporter = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false,
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass,
-      },
-    });
-    console.log('📧 Demo Mode: Using Ethereal test email');
-    console.log('   View sent emails at: https://ethereal.email/');
-    console.log('   Username:', testAccount.user);
-    console.log('   To use real email, set USE_ETHEREAL=false in .env file');
-  } else {
-    // Production mode: Use real SMTP service
-    const emailService = process.env.EMAIL_SERVICE || 'gmail';
-    const emailUser = process.env.EMAIL_USER;
-    const emailPass = process.env.EMAIL_PASS;
-
-    if (!emailUser || !emailPass) {
-      throw new Error('EMAIL_USER and EMAIL_PASS must be set in .env file for production');
-    }
-
-    if (emailService === 'gmail') {
+  try {
+    if (useEthereal) {
+      // Demo mode: Create test account at https://ethereal.email/
+      const testAccount = await nodemailer.createTestAccount();
       transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: emailUser,
-          pass: emailPass
-        }
-      });
-      console.log('📧 Production Mode: Using Gmail SMTP');
-    } else if (emailService === 'sendgrid') {
-      transporter = nodemailer.createTransport({
-        host: 'smtp.sendgrid.net',
+        host: 'smtp.ethereal.email',
         port: 587,
         secure: false,
         auth: {
-          user: 'apikey',
-          pass: emailPass
-        }
+          user: testAccount.user,
+          pass: testAccount.pass,
+        },
       });
-      console.log('📧 Production Mode: Using SendGrid SMTP');
+      console.log('📧 Demo Mode: Using Ethereal test email');
+      console.log('   View sent emails at: https://ethereal.email/');
+      console.log('   Username:', testAccount.user);
+      console.log('   To use real email, set USE_ETHEREAL=false in .env file');
     } else {
-      // Custom SMTP
-      transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-        port: parseInt(process.env.EMAIL_PORT) || 587,
-        secure: process.env.EMAIL_SECURE === 'true',
-        auth: {
-          user: emailUser,
-          pass: emailPass
-        }
-      });
-      console.log(`📧 Production Mode: Using custom SMTP (${process.env.EMAIL_HOST})`);
+      // Production mode: Use real SMTP service
+      const emailService = process.env.EMAIL_SERVICE || 'gmail';
+      const emailUser = process.env.EMAIL_USER;
+      const emailPass = process.env.EMAIL_PASS;
+
+      if (!emailUser || !emailPass) {
+        throw new Error('EMAIL_USER and EMAIL_PASS must be set in .env file for production');
+      }
+
+      if (emailService === 'gmail') {
+        transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: emailUser,
+            pass: emailPass
+          }
+        });
+        console.log('📧 Production Mode: Using Gmail SMTP');
+      } else if (emailService === 'sendgrid') {
+        transporter = nodemailer.createTransport({
+          host: 'smtp.sendgrid.net',
+          port: 587,
+          secure: false,
+          auth: {
+            user: 'apikey',
+            pass: emailPass
+          }
+        });
+        console.log('📧 Production Mode: Using SendGrid SMTP');
+      } else {
+        // Custom SMTP
+        transporter = nodemailer.createTransport({
+          host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+          port: parseInt(process.env.EMAIL_PORT) || 587,
+          secure: process.env.EMAIL_SECURE === 'true',
+          auth: {
+            user: emailUser,
+            pass: emailPass
+          }
+        });
+        console.log(`📧 Production Mode: Using custom SMTP (${process.env.EMAIL_HOST})`);
+      }
     }
+
+    // Verify transporter is ready
+    await transporter.verify();
+    emailReady = true;
+    console.log('✅ Email service is ready');
+  } catch (err) {
+    console.error('❌ Failed to setup email:', err.message);
+    console.error('   Please check your .env configuration');
   }
 }
 
 // Initialize email setup
-setupEmail().catch(err => {
-  console.error('❌ Failed to setup email:', err.message);
-  console.error('   Please check your .env configuration');
-});
+setupEmail();
 
 // Generate unique tracking token
 function generateTrackingToken() {
@@ -117,13 +125,27 @@ app.post('/api/submit-lead', async (req, res) => {
     console.log('✅ Response sent');
 
     // Send email asynchronously (don't wait for it)
-    sendEmail(fullName, email, requirement, trackingToken)
-      .then(() => {
-        console.log(`✅ Email sent successfully to ${email}`);
-      })
-      .catch((emailErr) => {
-        console.error('Error sending email:', emailErr);
-      });
+    if (!emailReady) {
+      console.log('⚠️  Email service not ready yet, queuing email...');
+      // Wait a bit and retry
+      setTimeout(() => {
+        sendEmail(fullName, email, requirement, trackingToken)
+          .then(() => {
+            console.log(`✅ Email sent successfully to ${email}`);
+          })
+          .catch((emailErr) => {
+            console.error('Error sending email:', emailErr);
+          });
+      }, 2000);
+    } else {
+      sendEmail(fullName, email, requirement, trackingToken)
+        .then(() => {
+          console.log(`✅ Email sent successfully to ${email}`);
+        })
+        .catch((emailErr) => {
+          console.error('Error sending email:', emailErr);
+        });
+    }
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
