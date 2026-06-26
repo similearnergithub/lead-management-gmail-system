@@ -160,8 +160,9 @@ async function sendEmail(name, email, requirement, trackingToken) {
     const trackableLink = `${baseUrl}/api/track/click/${trackingToken}`;
 
     const fromEmail = process.env.EMAIL_USER || 'your-email@gmail.com';
+    const fromName = process.env.EMAIL_FROM_NAME || 'Lead Management System';
     const mailOptions = {
-      from: fromEmail,
+      from: `${fromName} <${fromEmail}>`,
       to: email,
       subject: 'Thank you for reaching out!',
       html: `
