@@ -1,4 +1,4 @@
-const express = require('express');
+so i can testconst express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const nodemailer = require('nodemailer');
 const cors = require('cors');
@@ -159,7 +159,14 @@ app.post('/api/submit-lead', async (req, res) => {
 
         const leadId = this.lastID;
 
-        // Send personalized email
+        // Respond immediately to avoid timeout
+        res.json({
+          success: true,
+          message: 'Lead submitted successfully',
+          leadId: leadId
+        });
+
+        // Send email asynchronously (don't wait for it)
         sendEmail(fullName, email, requirement, trackingToken, leadId)
           .then(() => {
             // Update email_sent status
@@ -170,20 +177,10 @@ app.post('/api/submit-lead', async (req, res) => {
                 if (err) console.error('Error updating email_sent:', err);
               }
             );
-
-            res.json({
-              success: true,
-              message: 'Lead submitted successfully and email sent',
-              leadId: leadId
-            });
+            console.log(`✅ Email sent successfully to ${email}`);
           })
           .catch((emailErr) => {
             console.error('Error sending email:', emailErr);
-            res.json({
-              success: true,
-              message: 'Lead submitted but email failed to send',
-              leadId: leadId
-            });
           });
       }
     );
