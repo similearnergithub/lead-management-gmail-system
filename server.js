@@ -377,11 +377,13 @@ app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`Form: http://localhost:${PORT}/`);
-  console.log(`Dashboard: http://localhost:${PORT}/dashboard`);
-});
+// Start server (only for local development)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Form: http://localhost:${PORT}/`);
+    console.log(`Dashboard: http://localhost:${PORT}/dashboard`);
+  });
+}
 
 module.exports = app;
