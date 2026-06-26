@@ -195,8 +195,9 @@ app.post('/api/submit-lead', async (req, res) => {
 
 // Send personalized email with tracking
 async function sendEmail(name, email, requirement, trackingToken, leadId) {
-  const trackingPixelUrl = `http://localhost:${PORT}/api/track/open/${trackingToken}`;
-  const trackableLink = `http://localhost:${PORT}/api/track/click/${trackingToken}`;
+  const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
+  const trackingPixelUrl = `${baseUrl}/api/track/open/${trackingToken}`;
+  const trackableLink = `${baseUrl}/api/track/click/${trackingToken}`;
 
   const fromEmail = useEthereal ? 'noreply@leadsystem.com' : (process.env.EMAIL_USER || 'your-email@gmail.com');
   const mailOptions = {
