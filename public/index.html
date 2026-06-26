@@ -360,6 +360,7 @@
             messageDiv.style.display = 'none';
 
             try {
+                console.log('Submitting form...', formData);
                 const response = await fetch('/api/submit-lead', {
                     method: 'POST',
                     headers: {
@@ -368,7 +369,9 @@
                     body: JSON.stringify(formData)
                 });
 
+                console.log('Response status:', response.status);
                 const result = await response.json();
+                console.log('Response data:', result);
 
                 if (response.ok && result.success) {
                     messageDiv.className = 'message success';
@@ -386,6 +389,7 @@
                 messageDiv.className = 'message error';
                 messageDiv.textContent = 'An error occurred. Please try again.';
                 console.error('Error:', error);
+                console.error('Error message:', error.message);
             } finally {
                 submitBtn.disabled = false;
                 btnText.textContent = 'Send Message';
