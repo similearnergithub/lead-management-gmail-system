@@ -1,5 +1,4 @@
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
 const nodemailer = require('nodemailer');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -15,46 +14,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
-
-// Initialize SQLite Database
-const db = new sqlite3.Database('./leads.db', (err) => {
-  if (err) {
-    console.error('Error opening database:', err);
-  } else {
-    console.log('Connected to SQLite database');
-  }
-});
-
-// Create tables
-db.serialize(() => {
-  // Leads table
-  db.run(`CREATE TABLE IF NOT EXISTS leads (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    full_name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    phone TEXT,
-    company TEXT,
-    requirement TEXT NOT NULL,
-    submission_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-    email_sent BOOLEAN DEFAULT 0,
-    email_opened BOOLEAN DEFAULT 0,
-    email_opened_at DATETIME,
-    link_clicked BOOLEAN DEFAULT 0,
-    link_clicked_at DATETIME,
-    tracking_token TEXT UNIQUE
-  )`);
-
-  // Email events table for detailed tracking
-  db.run(`CREATE TABLE IF NOT EXISTS email_events (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    lead_id INTEGER,
-    event_type TEXT NOT NULL,
-    event_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-    ip_address TEXT,
-    user_agent TEXT,
-    FOREIGN KEY (lead_id) REFERENCES leads(id)
-  )`);
-});
 
 // Email configuration
 // Set USE_ETHEREAL=false in .env to use real email service
@@ -149,47 +108,22 @@ app.post('/api/submit-lead', async (req, res) => {
     const trackingToken = generateTrackingToken();
     console.log('📝 Generated tracking token:', trackingToken);
 
-    // Store lead in database
-    db.run(
-      `INSERT INTO leads (full_name, email, phone, company, requirement, tracking_token)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [fullName, email, phone, company, requirement, trackingToken],
-      function(err) {
-        if (err) {
-          console.error('❌ Error inserting lead:', err);
-          return res.status(500).json({ error: 'Failed to save lead' });
-        }
+    // Send response immediately
+    console.log('📤 Sending response to client');
+    res.json({
+      success: true,
+      message: 'Lead submitted successfully'
+    });
+    console.log('✅ Response sent');
 
-        const leadId = this.lastID;
-        console.log('✅ Lead saved with ID:', leadId);
-
-        // Respond immediately to avoid timeout
-        console.log('📤 Sending response to client');
-        res.json({
-          success: true,
-          message: 'Lead submitted successfully',
-          leadId: leadId
-        });
-        console.log('✅ Response sent');
-
-        // Send email asynchronously (don't wait for it)
-        sendEmail(fullName, email, requirement, trackingToken, leadId)
-          .then(() => {
-            // Update email_sent status
-            db.run(
-              'UPDATE leads SET email_sent = 1 WHERE id = ?',
-              [leadId],
-              (err) => {
-                if (err) console.error('Error updating email_sent:', err);
-              }
-            );
-            console.log(`✅ Email sent successfully to ${email}`);
-          })
-          .catch((emailErr) => {
-            console.error('Error sending email:', emailErr);
-          });
-      }
-    );
+    // Send email asynchronously (don't wait for it)
+    sendEmail(fullName, email, requirement, trackingToken)
+      .then(() => {
+        console.log(`✅ Email sent successfully to ${email}`);
+      })
+      .catch((emailErr) => {
+        console.error('Error sending email:', emailErr);
+      });
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -197,7 +131,7 @@ app.post('/api/submit-lead', async (req, res) => {
 });
 
 // Send personalized email with tracking
-async function sendEmail(name, email, requirement, trackingToken, leadId) {
+async function sendEmail(name, email, requirement, trackingToken) {
   const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
   const trackingPixelUrl = `${baseUrl}/api/track/open/${trackingToken}`;
   const trackableLink = `${baseUrl}/api/track/click/${trackingToken}`;
@@ -228,144 +162,47 @@ async function sendEmail(name, email, requirement, trackingToken, leadId) {
 app.get('/api/track/open/:token', (req, res) => {
   const { token } = req.params;
 
-  db.get(
-    'SELECT id FROM leads WHERE tracking_token = ?',
-    [token],
-    (err, row) => {
-      if (err) {
-        console.error('Error finding lead:', err);
-        return res.sendStatus(404);
-      }
+  console.log(`📊 Email opened by token: ${token}`);
 
-      if (row) {
-        // Update email opened status
-        db.run(
-          'UPDATE leads SET email_opened = 1, email_opened_at = CURRENT_TIMESTAMP WHERE id = ?',
-          [row.id],
-          (err) => {
-            if (err) console.error('Error updating email_opened:', err);
-          }
-        );
-
-        // Log event
-        db.run(
-          'INSERT INTO email_events (lead_id, event_type, ip_address, user_agent) VALUES (?, ?, ?, ?)',
-          [row.id, 'open', req.ip, req.get('user-agent')],
-          (err) => {
-            if (err) console.error('Error logging open event:', err);
-          }
-        );
-      }
-
-      // Return 1x1 transparent pixel
-      const pixel = Buffer.from(
-        'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
-        'base64'
-      );
-      res.set('Content-Type', 'image/gif');
-      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.send(pixel);
-    }
+  // Return 1x1 transparent pixel
+  const pixel = Buffer.from(
+    'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+    'base64'
   );
+  res.set('Content-Type', 'image/gif');
+  res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.send(pixel);
 });
 
 // Link click tracking endpoint
 app.get('/api/track/click/:token', (req, res) => {
   const { token } = req.params;
 
-  db.get(
-    'SELECT id FROM leads WHERE tracking_token = ?',
-    [token],
-    (err, row) => {
-      if (err) {
-        console.error('Error finding lead:', err);
-        return res.redirect('https://example.com');
-      }
+  console.log(`🔗 Link clicked by token: ${token}`);
 
-      if (row) {
-        // Update link clicked status
-        db.run(
-          'UPDATE leads SET link_clicked = 1, link_clicked_at = CURRENT_TIMESTAMP WHERE id = ?',
-          [row.id],
-          (err) => {
-            if (err) console.error('Error updating link_clicked:', err);
-          }
-        );
-
-        // Log event
-        db.run(
-          'INSERT INTO email_events (lead_id, event_type, ip_address, user_agent) VALUES (?, ?, ?, ?)',
-          [row.id, 'click', req.ip, req.get('user-agent')],
-          (err) => {
-            if (err) console.error('Error logging click event:', err);
-          }
-        );
-      }
-
-      // Redirect to actual link
-      res.redirect('https://example.com');
-    }
-  );
+  // Redirect to actual link
+  res.redirect('https://example.com');
 });
 
 // Analytics dashboard API
 app.get('/api/analytics', (req, res) => {
-  const queries = {
-    totalLeads: 'SELECT COUNT(*) as count FROM leads',
-    totalEmailsSent: 'SELECT COUNT(*) as count FROM leads WHERE email_sent = 1',
-    totalEmailsOpened: 'SELECT COUNT(*) as count FROM leads WHERE email_opened = 1',
-    totalLinkClicks: 'SELECT COUNT(*) as count FROM leads WHERE link_clicked = 1'
-  };
-
-  const results = {};
-  let completed = 0;
-  const totalQueries = Object.keys(queries).length;
-
-  for (const [key, query] of Object.entries(queries)) {
-    db.get(query, (err, row) => {
-      if (err) {
-        console.error(`Error fetching ${key}:`, err);
-        results[key] = 0;
-      } else {
-        results[key] = row.count;
-      }
-
-      completed++;
-
-      if (completed === totalQueries) {
-        const totalLeads = results.totalLeads || 0;
-        const totalEmailsSent = results.totalEmailsSent || 0;
-        const totalEmailsOpened = results.totalEmailsOpened || 0;
-        const totalLinkClicks = results.totalLinkClicks || 0;
-
-        const openRate = totalEmailsSent > 0 ? ((totalEmailsOpened / totalEmailsSent) * 100).toFixed(2) : 0;
-        const clickRate = totalEmailsSent > 0 ? ((totalLinkClicks / totalEmailsSent) * 100).toFixed(2) : 0;
-
-        res.json({
-          totalLeads,
-          totalEmailsSent,
-          totalEmailsOpened,
-          openRate: parseFloat(openRate),
-          totalLinkClicks,
-          clickRate: parseFloat(clickRate)
-        });
-      }
-    });
-  }
+  res.json({
+    totalLeads: 0,
+    totalEmailsSent: 0,
+    totalEmailsOpened: 0,
+    openRate: 0,
+    totalLinkClicks: 0,
+    clickRate: 0,
+    message: 'Analytics require a database. Currently running in demo mode.'
+  });
 });
 
 // Get all leads
 app.get('/api/leads', (req, res) => {
-  db.all(
-    'SELECT * FROM leads ORDER BY submission_time DESC',
-    (err, rows) => {
-      if (err) {
-        console.error('Error fetching leads:', err);
-        return res.status(500).json({ error: 'Failed to fetch leads' });
-      }
-      res.json(rows);
-    }
-  );
+  res.json({
+    leads: [],
+    message: 'Lead history requires a database. Currently running in demo mode.'
+  });
 });
 
 // Serve frontend pages
